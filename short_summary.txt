@@ -8,6 +8,18 @@ Issue an IBM Cloud IAM token and put in the TOKEN variable
 get-ibm-cloud-token
 
 ----
+Issue an UAA token and put it in the UAA_TOKEN variable for Cloud Foundry calls (set your CF target first)
+get-uaa-token
+
+----
+Create a temporary API Key for your user and put it in the API_KEY variable
+create-temporary-api-key
+
+----
+Delete temporary API Key for your user
+remove-temporary-api-key
+
+----
 Set Account ID to variable ACCOUNT_ID (used by scripts)
 set-accountid-var
 
@@ -32,3 +44,9 @@ Add users as members of a Watson Studio project (requires TOKEN and ACCOUNT_ID v
 invite-to-watson-studio project_id role email1 email2 email3...
 
 Example: invite-to-watson-studio 9c451f7c-c2b7-44ad-a59e-822737151425 viewer cpedra@br.ibm.com mbigelli@br.ibm.com
+
+----
+Migrate permissions between users in different realms (IBMid versus AppId) - run ./gatherCFData.sh first to bring CF permissions
+migrate-realm-permissions RealmID_1 RealmID_2 email1 email2 email3
+
+Example: migrate-realm-permissions IBMid QVKX5Zj2r8 user1@federationpoc.local
