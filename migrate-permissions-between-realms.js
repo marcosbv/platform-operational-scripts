@@ -197,8 +197,8 @@ async function migrateUsers(realm1, realm2, users) {
     const platformUsers = await listAllUsers()
 
     for(const iamEmail of users) {
-        const ibmIdUser = platformUsers.resources.filter((x) =>  x.email == iamEmail && x.realm == realm1 )
-        const appIdUser = platformUsers.resources.filter((x) =>  x.email == iamEmail && x.realm == realm2 )
+        const ibmIdUser = platformUsers.resources.filter((x) =>  x.user_id == iamEmail && x.realm == realm1 )
+        const appIdUser = platformUsers.resources.filter((x) =>  x.user_id == iamEmail && x.realm == realm2 )
         
 
         if(ibmIdUser.length == 0) {
