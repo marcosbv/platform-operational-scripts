@@ -162,9 +162,10 @@ async function migrateCFPermissions(realmUserId1, realmUserId2) {
                 if(obj.length > 0) {
                     let info = {
                         type: objType,
-                        id: obj[0].entity.name,
+                        id: obj[0].metadata.guid,
+                        description: obj[0].entity.name,
                         role: objRole,
-                        user_id : secondUserInfo[0].userId
+                        user_id : secondUserInfo[0].uaaGuid
                     }
 
                     if(objType == "space") {
@@ -180,6 +181,7 @@ async function migrateCFPermissions(realmUserId1, realmUserId2) {
         }
     }
 
+    /*
     console.log(`User has ${userPermissions.length} permissions in Cloud Foundry.
 Please insert the below commands in a terminal in order to give CF permissions: \n\n`)
     
@@ -190,15 +192,61 @@ Please insert the below commands in a terminal in order to give CF permissions: 
             console.log(`ibmcloud account space-role-set ${permission.user_id} ${permission.org_id} ${permission.id} ${permission.role}`)
         }
     }
-    
+    */
+
+    const usersAddToOrg = []
+    for(const permission of userPermissions) {
+        console.log(`Adding Cloud Foundry permission: ${permission.type == "org" ? "org-role-set" : "space-role-set"} ${permission.description} ${permission.role} `)
+
+        if(usersAddToOrg.indexOf(permission.user_id) == -1) {
+            await addUserToOrg(permission)
+            usersAddToOrg.push(permission.user_id)
+        }
+        
+        await setOrgSpaceRole(permission)
+    }
 }
+
+async function addUserToOrg(obj) {
+    const org_uuid = obj.type == "org" ? obj.id : obj.org_id
+    const url = `https://mccp.us-south.cf.cloud.ibm.com/v2/organizations/${org_uuid}/users/${obj.user_id}`
+    await basePutRequest(url)
+}
+
+async function setOrgSpaceRole(obj) {
+    const type = obj.type == "org" ? "organizations" : "spaces"
+    const url = `https://mccp.us-south.cf.cloud.ibm.com/v2/${type}/${obj.id}/${obj.role}/${obj.user_id}`
+    await basePutRequest(url)
+}
+async function basePutRequest(url) {
+
+    const options = {
+        url: url,
+        method: 'PUT',
+        headers: {
+            authorization: `bearer ${process.env.UAA_TOKEN}`
+        },
+        resolveWithFullResponse: true
+    }
+
+    console.log(`PUT ${url}`)
+    const response = await request.put(url, options);
+    const statusCode = response.statusCode;
+    console.log("Response: " + statusCode);
+
+    if(statusCode >= 400) {
+        console.log("Body: " + response.data);
+    }
+
+
+} 
 
 async function migrateUsers(realm1, realm2, users) {
     const platformUsers = await listAllUsers()
 
     for(const iamEmail of users) {
-        const ibmIdUser = platformUsers.resources.filter((x) =>  x.user_id == iamEmail && x.realm == realm1 )
-        const appIdUser = platformUsers.resources.filter((x) =>  x.user_id == iamEmail && x.realm == realm2 )
+        const ibmIdUser = platformUsers.resources.filter((x) =>  (x.user_id == iamEmail || x.email == iamEmail)  && x.realm == realm1 )
+        const appIdUser = platformUsers.resources.filter((x) =>  (x.user_id == iamEmail || x.email == iamEmail) && x.realm == realm2 )
         
 
         if(ibmIdUser.length == 0) {
