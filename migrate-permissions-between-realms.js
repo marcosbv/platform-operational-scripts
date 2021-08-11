@@ -229,7 +229,7 @@ async function addUserToOrg(obj) {
 
 async function setOrgSpaceRole(obj) {
     const type = obj.type == "org" ? "organizations" : "spaces"
-    const url = `https://mccp.us-south.cf.cloud.ibm.com/v2/${type}/${obj.id}/${obj.role}/${obj.user_id}`
+    const url = `https://mccp.us-south.cf.cloud.ibm.com/v2/${type}/${obj.id}/${obj.role == "billing" ? "billing_managers" : obj.role}/${obj.user_id}`
     await basePutRequest(url)
 }
 async function basePutRequest(url) {
