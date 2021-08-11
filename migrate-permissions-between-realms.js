@@ -5,6 +5,8 @@ const IAMPolicyManagementV1 = require('@ibm-cloud/platform-services/iam-policy-m
 const request = require('request-promise-native')
 const fs = require('fs');
 
+const accountOrgs = require('./data/account_orgs.json')
+
 const {BearerTokenAuthenticator} = require('@ibm-cloud/platform-services/auth')
 
 const authenticator = new BearerTokenAuthenticator({
@@ -171,7 +173,7 @@ async function migrateCFPermissions(realmUserId1, realmUserId2) {
                     if(objType == "space") {
                         const filteredOrg = allOrgs.resources.filter((x) => x.metadata.guid == obj[0].entity.organization_guid)
                         if(filteredOrg.length > 0) {
-                            info.org_id = filteredOrg[0].entity.name
+                            info.org_id = filteredOrg[0].metadata.guid
                         }
                     }
                     userPermissions.push(info)
@@ -194,16 +196,28 @@ Please insert the below commands in a terminal in order to give CF permissions: 
     }
     */
 
-    const usersAddToOrg = []
+    const usersAddToOrg = new Map()
     for(const permission of userPermissions) {
-        console.log(`Adding Cloud Foundry permission: ${permission.type == "org" ? "org-role-set" : "space-role-set"} ${permission.description} ${permission.role} `)
+        console.log(`Adding Cloud Foundry permission: ${permission.type == "org" ? "org-role-set" : "space-role-set"} ${permission.description} ${permission.role} ${permission.type == "space" ? "(org: " + permission.org_id + ")" : ""}`)
 
-        if(usersAddToOrg.indexOf(permission.user_id) == -1) {
+        const org_uuid = permission.type == "org" ? permission.id : permission.org_id
+        let usersList = usersAddToOrg.get(org_uuid)
+        if(usersList==null || usersList == undefined) {
+            usersList = []
+            usersAddToOrg.set(org_uuid, [permission.user_id])
+        }
+
+        if(usersList.indexOf(permission.user_id) == -1) {
             await addUserToOrg(permission)
-            usersAddToOrg.push(permission.user_id)
+            usersList.push(permission.user_id)
         }
         
-        await setOrgSpaceRole(permission)
+        try {
+            await setOrgSpaceRole(permission)
+        } catch(e) {
+            console.error(e)
+        }
+        
     }
 }
 

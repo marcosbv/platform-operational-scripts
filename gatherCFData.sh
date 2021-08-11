@@ -6,6 +6,10 @@ set +x
 
 echo "Getting account users..."
 ibmcloud account users --output json > users.json
+
+echo "Getting Account orgs..."
+ibmcloud account orgs --output json > account_orgs.json
+
 echo "Getting CF orgs and spaces..."
 curl -X GET "https://api.us-south.cf.cloud.ibm.com/v2/organizations" -H "Authorization: bearer ${UAA_TOKEN}" -o organizations.json
 curl -X GET "https://api.us-south.cf.cloud.ibm.com/v2/spaces" -H "Authorization: bearer ${UAA_TOKEN}" -o spaces.json
