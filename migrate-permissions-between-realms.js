@@ -263,8 +263,8 @@ async function migrateUsers(realm1, realm2, users) {
     const platformUsers = await listAllUsers()
 
     for(const iamEmail of users) {
-        const ibmIdUser = platformUsers.resources.filter((x) =>  (x.user_id == iamEmail || x.email == iamEmail)  && x.realm == realm1 )
-        const appIdUser = platformUsers.resources.filter((x) =>  (x.user_id == iamEmail || x.email == iamEmail) && x.realm == realm2 )
+        const ibmIdUser = platformUsers.resources.filter((x) =>  (x.user_id == iamEmail || x.email.toLowerCase() == iamEmail)  && x.realm == realm1 )
+        const appIdUser = platformUsers.resources.filter((x) =>  (x.user_id == iamEmail || x.email.toLowerCase() == iamEmail) && x.realm == realm2 )
         
 
         if(ibmIdUser.length == 0) {
@@ -370,10 +370,12 @@ async function migrateUsers(realm1, realm2, users) {
                     }
                 }
 
-                console.log("Migrating Cloud Foundry permissions...")
-                migrateCFPermissions(ibmIdUser[0].iam_id, appIdU.iam_id)
+               
                 
             }
+
+            console.log("Migrating Cloud Foundry permissions...")
+            migrateCFPermissions(ibmIdUser[0].iam_id, appIdU.iam_id)
 
             
         }
