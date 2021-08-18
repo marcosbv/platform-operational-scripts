@@ -131,6 +131,9 @@ async function migrateCFPermissions(realmUserId1, realmUserId2) {
 
     const allJsonFiles = fs.readdirSync('./data')
 
+    console.log(`Logged user has access to the following orgs: ${allOrgs.resources.map(x => x.entity.name)}`)
+    console.log(`Logged user has access to the following spaces: ${allSpaces.resources.map(x => x.entity.name)}`)
+
     const userInfo = allUsers.filter(x => x.ibmUniqueId == realmUserId1);
     const secondUserInfo = allUsers.filter(x => x.ibmUniqueId == realmUserId2);
     
@@ -183,6 +186,7 @@ async function migrateCFPermissions(realmUserId1, realmUserId2) {
         }
     }
 
+    console.log(`User in realm 1 (${realmUserId1}) has ${userPermissions.length} permissions.`)
     /*
     console.log(`User has ${userPermissions.length} permissions in Cloud Foundry.
 Please insert the below commands in a terminal in order to give CF permissions: \n\n`)
@@ -366,7 +370,7 @@ async function migrateUsers(realm1, realm2, users) {
                     }
                 }
 
-
+                console.log("Migrating Cloud Foundry permissions...")
                 migrateCFPermissions(ibmIdUser[0].iam_id, appIdU.iam_id)
                 
             }

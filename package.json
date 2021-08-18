@@ -1,12 +1,13 @@
 {
+  "name": "platform-operational-scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "invite-users-catalog.js",
   "dependencies": {
     "@ibm-cloud/platform-services": "^0.19.4",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.9"
   },
-  "name": "platform-operational-scripts",
-  "description": "",
-  "version": "1.0.0",
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
